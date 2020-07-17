@@ -1,0 +1,2 @@
+# .vimconf
+vim配置
