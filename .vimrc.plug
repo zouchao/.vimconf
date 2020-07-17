@@ -1,0 +1,241 @@
+" Auto Install Plug {{{
+if empty(glob('~/.vim/autoload/plug.vim'))
+  silent !mkdir -p ~/.vim/autoload
+  silent !curl -fLo ~/.vim/autoload/plug.vim
+    \ https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
+  autocmd VimEnter * PlugInstall
+endif
+" }}}
+
+call plug#begin('~/.vim/bundle')
+
+" Appearance {{{
+" Dark
+Plug 'w0ng/vim-hybrid'
+Plug 'rakr/vim-one'
+Plug 'morhetz/gruvbox'
+  let g:gruvbox_contrast_dark='hard'
+  let g:gruvbox_contrast_light='hard'
+
+" Airline
+Plug 'vim-airline/vim-airline-themes'
+Plug 'bling/vim-airline'
+  " let g:airline_theme='dracula'
+  let g:airline_powerline_fonts=1
+  let g:airline#extensions#branch#enabled = 1
+  let g:airline#extensions#branch#empty_message = ''
+  let g:airline#extensions#syntastic#enabled = 1
+  " control which sections get truncated and at what width. >
+  let g:airline#extensions#default#section_truncate_width = {
+      \   'b': 79,
+      \   'x': 60,
+      \   'y': 88,
+      \   'z': 45,
+      \ }
+  " disable summary of changed hunks under source control.
+  let g:airline#extensions#hunks#enabled = 0
+"}}}
+
+" Nert {{{
+
+" 用来提供一个导航目录的侧边栏
+" Plug 'scrooloose/nerdtree'
+"   " Make it colourful and pretty
+"   let NERDChristmasTree = 1
+"   " 显示行号
+"   let NERDTreeShowLineNumbers=0
+"   " 打开文件时是否显示目录
+"   let NERDTreeAutoCenter=0
+"   " Disable 'bookmarks' and 'help'
+"   let NERDTreeMinimalUI = 1
+"   " 显示隐藏文件
+"   let NERDTreeShowHidden = 1
+"   " 设置宽度
+"   let NERDTreeWinSize=28
+"   " 忽略一下文件的显示
+"   let NERDTreeIgnore = [
+"     \ '\~$', '\.pyc$', '\.pyo$', '\.class$', '\.aps',
+"     \ '\.git', '\.hg', '\.svn', '\.sass-cache',
+"     \ '\.coverage$', '\.tmp$', '\.gitkeep$',
+"     \ '\.vcxproj', '\.bundle', '\.DS_Store$', '\tags$']
+"   " 打开和关闭NERDTree快捷键
+"   map <F2> :NERDTreeToggle<CR>
+"   nmap ff :NERDTreeFind<CR>
+"
+" " 可以使 nerdtree Tab 标签的名称更友好些
+" Plug 'jistr/vim-nerdtree-tabs'
+
+if has('nvim')
+  Plug 'Shougo/defx.nvim', { 'do': ':UpdateRemotePlugins' }
+else
+  Plug 'Shougo/defx.nvim'
+  Plug 'roxma/nvim-yarp'
+  Plug 'roxma/vim-hug-neovim-rpc'
+endif
+
+" 这是defx的两个支持插件
+Plug 'kristijanhusak/defx-git'
+Plug 'kristijanhusak/defx-icons'
+
+
+" " 可以在导航目录中看到 git 版本信息
+" Plug 'Xuyuanp/nerdtree-git-plugin'
+"   let g:NERDTreeIndicatorMapCustom = {
+"     \ "Modified"  : "✹",
+"     \ "Staged"    : "✚",
+"     \ "Untracked" : "✭",
+"     \ "Renamed"   : "➜",
+"     \ "Unmerged"  : "═",
+"     \ "Deleted"   : "✖",
+"     \ "Dirty"     : "✗",
+"     \ "Clean"     : "✔︎",
+"     \ 'Ignored'   : '☒',
+"     \ "Unknown"   : "?"
+"     \ }
+"   let g:NERDTreeShowIgnoredStatus = 0
+"   nmap <Leader>pwd :NERDTreeCWD<CR>
+" "}}}
+
+" Core {{{
+" Vim 中文文档
+Plug 'yianwillis/vimcdoc'
+
+" 自动补全括号
+Plug 'jiangmiao/auto-pairs'
+
+" 判断是否是在git仓库
+function! Not_in_git_repo()
+  let root = split(system('git rev-parse --show-toplevel'), '\n')[0]
+  return v:shell_error
+endfunction
+
+" 文件搜索
+Plug 'junegunn/fzf', { 'dir': '~/.fzf', 'do': { -> fzf#install() } }
+Plug 'junegunn/fzf.vim'
+  let $FZF_DEFAULT_OPTS = '--layout=reverse' " 输入在上方，文件列表在下方
+  let g:fzf_layout = { 'window': { 'width': 0.7, 'height': 0.6 } }
+  nnoremap <expr><C-p> Not_in_git_repo() ? ":Files<CR>" : ":GitFiles<CR>"
+  " nnoremap <Leader>f :Files<CR>
+  nnoremap <Leader>b :Buffers<CR>
+  nnoremap <Leader>hh :History<CR>
+  nnoremap <Leader>m :Marks<CR>
+
+
+" 有道词典在线翻译
+Plug 'ianva/vim-youdao-translater'
+
+" git浏览器
+Plug 'tpope/vim-fugitive'
+  nnoremap <Leader>gd :Git diff<CR>
+  nnoremap <Leader>gb :Gblame<CR>
+" 可以在文档中显示 git 信息
+Plug 'airblade/vim-gitgutter'
+
+" 浮动窗口
+Plug 'voldikss/vim-floaterm'
+" }}}
+
+" Programming {{{
+" 程序语法语义检测,rubocop、golint等
+Plug 'w0rp/ale', { 'for': ['ruby', 'go', 'scss', 'coffee', 'javascript'] }
+  let g:ale_lint_on_enter = 1
+  let g:ale_lint_on_text_changed = 'never'
+
+" 可以在 vim 中使用 tab 补全
+" Plug 'vim-scripts/SuperTab'
+
+" 可以在 vim 中自动完成
+" Plug 'Shougo/neocomplete.vim'
+
+" 代码自动完成，安装完插件还需要额外配置才可以使用
+"Plug 'Valloric/YouCompleteMe'
+"  " make YCM compatible with UltiSnips (using supertab)
+"  let g:ycm_key_list_select_completion = ['<c-j>', '<DOWN>']
+"  let g:ycm_key_list_previous_completion = ['<c-k>', '<Up>']
+"  let g:SuperTabDefaultCompletionType = '<c-j>'
+"
+"  " 关闭了提示再次触发的快捷键
+"  let g:ycm_key_invoke_completion = '<Leader>,'
+
+" 下面两个插件要配合使用，可以自动生成代码块
+Plug 'SirVer/ultisnips'
+Plug 'xfyuan/vim-snippets'
+" Plug 'honza/vim-snippets'
+ " better key bindings for UltiSnipsExpandTrigger
+  let g:UltiSnipsExpandTrigger = "<tab>"
+  let g:UltiSnipsJumpForwardTrigger = "<tab>"
+  let g:UltiSnipsJumpBackwardTrigger = "<s-tab>"
+
+"coc
+ Plug 'neoclide/coc.nvim', {'branch': 'release'}
+   if filereadable(expand("~/.vimconf/.coc.vim"))
+     source ~/.vimconf/.coc.vim
+   endif
+
+Plug 'mattn/emmet-vim'
+Plug 'tomtom/tcomment_vim'
+" }}}
+
+" Golang {{{
+Plug 'fatih/vim-go', { 'for': ['go'], 'do': ':GoUpdateBinaries' }
+  let g:go_disable_autoinstall = 0
+  let g:go_highlight_functions = 1
+  let g:go_highlight_methods = 1
+  let g:go_highlight_structs = 1
+  let g:go_highlight_operators = 1
+  let g:go_highlight_build_constraints = 1
+  let g:go_fmt_command = "goimports"
+Plug 'cespare/vim-toml', { 'for': ['toml'] }
+Plug 'dgryski/vim-godef'
+" au FileType go nmap <Leader>gis <Plug>(go-implements)
+" au FileType go nmap <Leader>i <Plug>(go-info)
+" au FileType go nmap <Leader>gdc <Plug>(go-doc)
+" au FileType go nmap <Leader>gdv <Plug>(go-doc-vertical)
+au FileType go nmap <Leader>r <Plug>(go-run)
+au FileType go nmap <Leader>b <Plug>(go-build)
+au FileType go nmap <Leader>t <Plug>(go-test)
+au FileType go nmap <Leader>c <Plug>(go-coverage)
+au FileType go nmap <Leader>e <Plug>(go-rename)
+" au FileType go nmap <Leader>ds <Plug>(go-def-split)
+" au FileType go nmap <Leader>dv <Plug>(go-def-vertical)
+" au FileType go nmap <Leader>dt <Plug>(go-def-tab)
+
+" 查看当前代码文件中的变量和函数列表的插件，
+" 可以切换和跳转到代码中对应的变量和函数的位置
+" 大纲式导航, Go 需要 https://github.com/jstemmer/gotags 支持
+Plug 'majutsushi/tagbar'
+" majutsushi/tagbar 插件打开关闭快捷键
+  nmap <F9> :TagbarToggle<CR>
+
+  let g:tagbar_type_go = {
+    \ 'ctagstype' : 'go',
+    \ 'kinds'     : [
+      \ 'p:package',
+      \ 'i:imports:1',
+      \ 'c:constants',
+      \ 'v:variables',
+      \ 't:types',
+      \ 'n:interfaces',
+      \ 'w:fields',
+      \ 'e:embedded',
+      \ 'm:methods',
+      \ 'r:constructor',
+      \ 'f:functions'
+    \ ],
+    \ 'sro' : '.',
+    \ 'kind2scope' : {
+      \ 't' : 'ctype',
+      \ 'n' : 'ntype'
+    \ },
+    \ 'scope2kind' : {
+      \ 'ctype' : 't',
+      \ 'ntype' : 'n'
+    \ },
+    \ 'ctagsbin'  : 'gotags',
+    \ 'ctagsargs' : '-sort -silent'
+  \ }
+
+" }}}
+
+
+call plug#end()
